@@ -1,0 +1,27 @@
+settings =
+{
+	orientation =
+	{
+		default = "landscapeRight",
+		supported =
+		{
+			"landscapeLeft", "landscapeRight",
+		},
+	},
+	window =
+	{
+		defaultViewWidth = 960,
+		defaultViewHeight = 640,
+		titleText =
+		{
+			default = "steamworks.newImageRect() Rotating Group Test",
+		},
+	},
+	plugins =
+	{
+		["plugin.steamworks"] =
+		{
+			publisherId = "com.coronalabs",
+		}
+	},
+}

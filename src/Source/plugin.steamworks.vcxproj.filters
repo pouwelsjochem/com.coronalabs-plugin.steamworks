@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="LuaEventDispatcher.cpp" />
+    <ClCompile Include="RuntimeContext.cpp" />
+    <ClCompile Include="BaseSteamCallResultHandler.cpp" />
+    <ClCompile Include="SteamworksLuaInterface.cpp" />
+    <ClCompile Include="DispatchEventTask.cpp" />
+    <ClCompile Include="SteamStatValueType.cpp" />
+    <ClCompile Include="SteamImageWrapper.cpp" />
+    <ClCompile Include="PluginConfigLuaSettings.cpp" />
+    <ClCompile Include="SteamImageInfo.cpp" />
+    <ClCompile Include="SteamUserImageType.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LuaEventDispatcher.h" />
+    <ClInclude Include="RuntimeContext.h" />
+    <ClInclude Include="LuaMethodCallback.h" />
+    <ClInclude Include="SteamCallResultHandler.h" />
+    <ClInclude Include="BaseSteamCallResultHandler.h" />
+    <ClInclude Include="PluginMacros.h" />
+    <ClInclude Include="DispatchEventTask.h" />
+    <ClInclude Include="SteamStatValueType.h" />
+    <ClInclude Include="SteamImageWrapper.h" />
+    <ClInclude Include="PluginConfigLuaSettings.h" />
+    <ClInclude Include="SteamImageInfo.h" />
+    <ClInclude Include="SteamUserImageType.h" />
+  </ItemGroup>
+</Project>
