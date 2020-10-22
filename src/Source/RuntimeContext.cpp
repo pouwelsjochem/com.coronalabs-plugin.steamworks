@@ -99,62 +99,6 @@ SteamLeaderboardEntries_t RuntimeContext::GetCachedLeaderboardHandleByName(const
 	return 0;
 }
 
-SteamImageInfo RuntimeContext::GetUserImageInfoFor(const CSteamID& userSteamId, const SteamUserImageType& imageType)
-{
-	// Validate arguments.
-	if ((userSteamId.IsValid() == false) || (imageType == SteamUserImageType::kUnknown))
-	{
-		return SteamImageInfo();
-	}
-
-	// Fetch Steam interface needed to perform this operation.
-	auto steamFriendsPointer = SteamFriends();
-	if (!steamFriendsPointer)
-	{
-		return SteamImageInfo();
-	}
-
-	// Fetch a handle to the requested image.
-	int imageHandle = 0;
-	if (imageType == SteamUserImageType::kAvatarSmall)
-	{
-		imageHandle = steamFriendsPointer->GetSmallFriendAvatar(userSteamId);
-	}
-	else if (imageType == SteamUserImageType::kAvatarMedium)
-	{
-		imageHandle = steamFriendsPointer->GetMediumFriendAvatar(userSteamId);
-	}
-	else if (imageType == SteamUserImageType::kAvatarLarge)
-	{
-		imageHandle = steamFriendsPointer->GetLargeFriendAvatar(userSteamId);
-	}
-	else
-	{
-		return SteamImageInfo();
-	}
-
-	// If the handle is zero, then Steam hasn't downloaded/cached the image yet. We must request it manually.
-	// Note: A handle of -1 can be returned by GetLargeFriendAvatar(), which means it has already sent a request.
-	if (0 == imageHandle)
-	{
-		steamFriendsPointer->RequestUserInformation(userSteamId, false);
-	}
-
-	// If the caller is requesting a large avatar, then set up this runtime context to auto-fetch
-	// the user's large avatar anytime we detect that the user's smaller avatars have changed.
-	// Note: We can't fetch a large avatar via GetLargeFriendAvatar() until smaller avatars have been fetched first
-	//       via a call to the RequestUserInformation() function and we must wait for the "PersonaStateChange_t" event.
-	//       This means that we must chain the avatar fetching requests.
-	if (imageType == SteamUserImageType::kAvatarLarge)
-	{
-		fLargeAvatarSubscribedUserIdSet.insert(userSteamId.ConvertToUint64());
-	}
-
-	// Return Steam's image information with the retrieved handle.
-	// Will return an invalid image info object if the handle is invalid.
-	return SteamImageInfo::FromImageHandle(imageHandle);
-}
-
 RuntimeContext* RuntimeContext::GetInstanceBy(lua_State* luaStatePointer)
 {
 	// Validate.
@@ -270,38 +214,6 @@ void RuntimeContext::OnHandleGlobalSteamEvent(TSteamResultType* eventDataPointer
 	taskPointer->SetLuaEventDispatcher(fLuaEventDispatcherPointer);
 	taskPointer->AcquireEventDataFrom(*eventDataPointer);
 
-	// Special handling of particular Steam events goes here.
-	if (typeid(*eventDataPointer) == typeid(PersonaStateChange_t))
-	{
-		// User info has changed.
-		auto steamFriendsPointer = SteamFriends();
-		auto concreteEvenDatatPointer = (PersonaStateChange_t*)eventDataPointer;
-		auto concreteTaskPointer = (DispatchPersonaStateChangedEventTask*)taskPointer;
-		if (steamFriendsPointer && (concreteEvenDatatPointer->m_nChangeFlags & k_EPersonaChangeAvatar))
-		{
-			// The user's small/medium avatar image has changed.
-			// Check if we're set up to auto-fetch this user's large avatar.
-			// Note: You can't load a large avatar until the small/medium avatars have been loaded first.
-			auto iterator = fLargeAvatarSubscribedUserIdSet.find(concreteEvenDatatPointer->m_ulSteamID);
-			if (iterator != fLargeAvatarSubscribedUserIdSet.end())
-			{
-				// Request an image handle to this user's large avatar.
-				const int imageHandle = steamFriendsPointer->GetLargeFriendAvatar(concreteEvenDatatPointer->m_ulSteamID);
-				if (SteamImageInfo::FromImageHandle(imageHandle).IsValid())
-				{
-					// The large avatar has already been loaded. Flag the change in the Lua event dispatcher task.
-					// Note: In this case, we'll never get an "AvatarImageLoaded_t" event from Steam.
-					concreteTaskPointer->SetHasLargeAvatarChanged(true);
-				}
-				else if (imageHandle == -1)
-				{
-					// An image handle of -1 indicates that Steam has started downloading the large avatar image.
-					// Steam will dispatch an "AvatarImageLoaded_t" event later once downloaded.
-				}
-			}
-		}
-	}
-
 	// Queue the received Steam event data to be dispatched to Lua later.
 	// This ensures that Lua events are only dispatched while Corona is running (ie: not suspended).
 	fDispatchEventTaskQueue.push(std::shared_ptr<BaseDispatchEventTask>(taskPointer));
@@ -331,11 +243,6 @@ void RuntimeContext::OnHandleGlobalSteamEventWithGameId(TSteamResultType* eventD
 	OnHandleGlobalSteamEvent<TSteamResultType, TDispatchEventTask>(eventDataPointer);
 }
 
-void RuntimeContext::OnSteamAvatarImageLoaded(AvatarImageLoaded_t* eventDataPointer)
-{
-	OnHandleGlobalSteamEvent<AvatarImageLoaded_t, DispatchPersonaStateChangedEventTask>(eventDataPointer);
-}
-
 void RuntimeContext::OnSteamGameOverlayActivated(GameOverlayActivated_t* eventDataPointer)
 {
 	OnHandleGlobalSteamEvent<GameOverlayActivated_t, DispatchGameOverlayActivatedEventTask>(eventDataPointer);
@@ -345,17 +252,6 @@ void RuntimeContext::OnSteamMicrotransactionAuthorizationReceived(MicroTxnAuthor
 {
 	OnHandleGlobalSteamEvent<
 			MicroTxnAuthorizationResponse_t, DispatchMicrotransactionAuthorizationResponseEventTask>(eventDataPointer);
-}
-
-void RuntimeContext::OnSteamPersonaStateChanged(PersonaStateChange_t* eventDataPointer)
-{
-	OnHandleGlobalSteamEvent<PersonaStateChange_t, DispatchPersonaStateChangedEventTask>(eventDataPointer);
-}
-
-void RuntimeContext::OnSteamUserAchievementIconFetched(UserAchievementIconFetched_t* eventDataPointer)
-{
-	OnHandleGlobalSteamEventWithGameId<
-			UserAchievementIconFetched_t, DispatchUserAchievementIconFetchedEventTask>(eventDataPointer);
 }
 
 void RuntimeContext::OnSteamUserAchievementStored(UserAchievementStored_t* eventDataPointer)

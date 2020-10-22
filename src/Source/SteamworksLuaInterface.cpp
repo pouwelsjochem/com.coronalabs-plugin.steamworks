@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------
 // 
-// SteamImageWrapper.cpp
+// SteamworksLuaInterface.cpp
 // Copyright (c) 2016 Corona Labs Inc. All rights reserved.
 // This software may be modified and distributed under the terms
 // of the MIT license.  See the LICENSE file for details.
@@ -14,10 +14,7 @@
 #include "PluginConfigLuaSettings.h"
 #include "PluginMacros.h"
 #include "RuntimeContext.h"
-#include "SteamImageInfo.h"
-#include "SteamImageWrapper.h"
 #include "SteamStatValueType.h"
-#include "SteamUserImageType.h"
 #include <cmath>
 #include <sstream>
 #include <stdint.h>
@@ -281,51 +278,6 @@ void OnSteamWarningMessageReceived(int severityLevel, const char* message)
 // Lua API Handlers
 //---------------------------------------------------------------------------------
 
-/** ImageInfo steamworks.getAchievementImageInfo(achievementName) */
-int OnGetAchievementImageInfo(lua_State* luaStatePointer)
-{
-	// Validate.
-	if (!luaStatePointer)
-	{
-		return 0;
-	}
-
-	// Fetch the required achievement name argument.
-	const char* achievementName = nullptr;
-	if (lua_type(luaStatePointer, 1) == LUA_TSTRING)
-	{
-		achievementName = lua_tostring(luaStatePointer, 1);
-	}
-	if (!achievementName)
-	{
-		CoronaLuaError(luaStatePointer, "1st argument must be set to the achievement's unique name.");
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-
-	// Fetch the Steam interface needed by this API call.
-	// Note: Will return null if Steam client is not currently running.
-	auto steamUserStatsPointer = SteamUserStats();
-	if (!steamUserStatsPointer)
-	{
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-
-	// Fetch a handle to the requested image.
-	int imageHandle = steamUserStatsPointer->GetAchievementIcon(achievementName);
-
-	// Push the requested image information to Lua.
-	// Note: Will return nil if image is not available.
-	auto imageInfo = SteamImageInfo::FromImageHandle(imageHandle);
-	bool wasPushed = imageInfo.PushToLua(luaStatePointer);
-	if (!wasPushed)
-	{
-		lua_pushnil(luaStatePointer);
-	}
-	return 1;
-}
-
 /** AchievementInfo steamworks.getAchievementInfo(achievementName, [userSteamId]) */
 int OnGetAchievementInfo(lua_State* luaStatePointer)
 {
@@ -455,106 +407,6 @@ int OnGetAchievementInfo(lua_State* luaStatePointer)
 		}
 		lua_pushboolean(luaStatePointer, isHidden ? 1 : 0);
 		lua_setfield(luaStatePointer, -2, "hidden");
-	}
-	return 1;
-}
-
-/** ImageInfo steamworks.getUserImageInfo(type, [userSteamId]) */
-int OnGetUserImageInfo(lua_State* luaStatePointer)
-{
-	// Validate.
-	if (!luaStatePointer)
-	{
-		return 0;
-	}
-
-	// Fetch the required image type argument.
-	if (lua_type(luaStatePointer, 1) != LUA_TSTRING)
-	{
-		CoronaLuaError(luaStatePointer, "1st argument must be set to image type's unique name.");
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-	const char* imageTypeName = lua_tostring(luaStatePointer, 1);
-	if (!imageTypeName)
-	{
-		imageTypeName = "";
-	}
-	const auto imageType = SteamUserImageType::FromCoronaStringId(imageTypeName);
-	if (imageType == SteamUserImageType::kUnknown)
-	{
-		CoronaLuaError(luaStatePointer, "Given unknown image type name: \"%s\"", imageTypeName);
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-
-	// Fetch the optional steam ID of the user.
-	CSteamID userSteamId;
-	{
-		const char* userStringId = nullptr;
-		const auto luaArgumentType = lua_type(luaStatePointer, 2);
-		if (luaArgumentType == LUA_TSTRING)
-		{
-			userStringId = lua_tostring(luaStatePointer, 2);
-		}
-		else if ((luaArgumentType != LUA_TNONE) && (luaArgumentType != LUA_TNIL))
-		{
-			CoronaLuaError(luaStatePointer, "Argument (userSteamId) is not of type string.");
-			lua_pushnil(luaStatePointer);
-			return 1;
-		}
-		if (userStringId)
-		{
-			uint64 integerId = 0;
-			std::stringstream stringStream;
-			stringStream.imbue(std::locale::classic());
-			stringStream << userStringId;
-			stringStream >> integerId;
-			if (!stringStream.fail())
-			{
-				userSteamId.SetFromUint64(integerId);
-			}
-			if (userSteamId.IsValid() == false)
-			{
-				CoronaLuaError(luaStatePointer, "Given user ID is invalid: '%s'", userStringId);
-				lua_pushnil(luaStatePointer);
-				return 1;
-			}
-		}
-	}
-
-	// Fetch this plugin's runtime context associated with the calling Lua state.
-	auto contextPointer = (RuntimeContext*)lua_touserdata(luaStatePointer, lua_upvalueindex(1));
-	if (!contextPointer)
-	{
-		lua_pushboolean(luaStatePointer, 0);
-		return 1;
-	}
-
-	// Fetch the Steam interfaces needed by this API call.
-	auto steamUserPointer = SteamUser();
-	auto steamFriendsPointer = SteamFriends();
-	if (!steamUserPointer || !steamFriendsPointer)
-	{
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-
-	// If we were not given a user ID, then default to the logged in user's ID.
-	if (userSteamId.IsValid() == false)
-	{
-		userSteamId = steamUserPointer->GetSteamID();
-	}
-
-	// Fetch information about the requested user image.
-	auto imageInfo = contextPointer->GetUserImageInfoFor(userSteamId, imageType);
-
-	// Push the requested image information to Lua.
-	// Note: Will return nil if image is not available.
-	bool wasPushed = imageInfo.PushToLua(luaStatePointer);
-	if (!wasPushed)
-	{
-		lua_pushnil(luaStatePointer);
 	}
 	return 1;
 }
@@ -932,216 +784,6 @@ int OnGetUserStatValue(lua_State* luaStatePointer)
 		lua_pushnil(luaStatePointer);
 	}
 	return 1;
-}
-
-/** DisplayObject steamworks.newImageRect([parent,] imageHandle, width, height) */
-int OnNewImageRect(lua_State* luaStatePointer)
-{
-	// Validate.
-	if (!luaStatePointer)
-	{
-		return 0;
-	}
-
-	// Fetch the optional parent GroupObject argument.
-	// Note: We assume it's a GroupObject if argument is a table that has an insert() function.
-	bool wasGivenParent = false;
-	int luaArgumentIndex = 1;
-	{
-		bool isInvalidArgument = false;
-		const auto luaArgumentType = lua_type(luaStatePointer, luaArgumentIndex);
-		if (luaArgumentType == LUA_TTABLE)
-		{
-			lua_getfield(luaStatePointer, luaArgumentIndex, "insert");
-			if (lua_type(luaStatePointer, -1) == LUA_TFUNCTION)
-			{
-				wasGivenParent = true;
-				luaArgumentIndex++;
-			}
-			else
-			{
-				isInvalidArgument = true;
-			}
-			lua_pop(luaStatePointer, 1);
-		}
-		else if (luaArgumentType != LUA_TNUMBER)
-		{
-			isInvalidArgument = true;
-		}
-		if (isInvalidArgument)
-		{
-			CoronaLuaError(luaStatePointer, "1st argument must be an 'imageHandle' or a parent 'GroupObject'.");
-			lua_pushnil(luaStatePointer);
-			return 1;
-		}
-	}
-
-	// Fetch the required image handle argument.
-	int imageHandle = 0;
-	if (lua_type(luaStatePointer, luaArgumentIndex) == LUA_TNUMBER)
-	{
-		imageHandle = (int)lua_tointeger(luaStatePointer, luaArgumentIndex);
-	}
-	else
-	{
-		CoronaLuaError(luaStatePointer, "Argument %d must be a numeric 'imageHandle'.", luaArgumentIndex);
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-	luaArgumentIndex++;
-
-	// Fetch the required content width argument.
-	double contentWidth = 0;
-	if (lua_type(luaStatePointer, luaArgumentIndex) == LUA_TNUMBER)
-	{
-		contentWidth = lua_tonumber(luaStatePointer, luaArgumentIndex);
-	}
-	else
-	{
-		CoronaLuaError(luaStatePointer, "Argument %d must be a numeric content width.", luaArgumentIndex);
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-	luaArgumentIndex++;
-
-	// Fetch the required content height argument.
-	double contentHeight = 0;
-	if (lua_type(luaStatePointer, luaArgumentIndex) == LUA_TNUMBER)
-	{
-		contentHeight = lua_tonumber(luaStatePointer, luaArgumentIndex);
-	}
-	else
-	{
-		CoronaLuaError(luaStatePointer, "Argument %d must be a numeric content height.", luaArgumentIndex);
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-	luaArgumentIndex++;
-
-	// Do not continue if given an invalid image handle.
-	auto imageInfo = SteamImageInfo::FromImageHandle(imageHandle);
-	if (imageInfo.IsNotValid())
-	{
-		CoronaLuaWarning(luaStatePointer, "Given invalid image handle: %d", imageHandle);
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-
-	// Copy the Steam image to a new Corona "TextureResourceExternal" object.
-	int textureCount = SteamImageWrapper::PushTexture(luaStatePointer, imageHandle);
-	if (textureCount != 1)
-	{
-		CoronaLuaWarning(luaStatePointer, "Failed to generate texture for image handle: %d", imageHandle);
-		if (textureCount > 0)
-		{
-			lua_pop(luaStatePointer, textureCount);
-		}
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-	int textureIndex = lua_gettop(luaStatePointer);
-
-	// Create a new DisplayObject filled with texture loaded above.
-	bool wasDisplayObjectCreated = false;
-	lua_getglobal(luaStatePointer, "display");
-	if (lua_istable(luaStatePointer, -1))
-	{
-		lua_getfield(luaStatePointer, -1, "newImageRect");
-		if (lua_isfunction(luaStatePointer, -1))
-		{
-			if (wasGivenParent)
-			{
-				lua_pushvalue(luaStatePointer, 1);
-			}
-			lua_getfield(luaStatePointer, textureIndex, "filename");
-			lua_getfield(luaStatePointer, textureIndex, "baseDir");
-			lua_pushnumber(luaStatePointer, contentWidth);
-			lua_pushnumber(luaStatePointer, contentHeight);
-			int argumentCount = (wasGivenParent ? 1 : 0) + 4;
-			CoronaLuaDoCall(luaStatePointer, argumentCount, 1);
-			if (lua_type(luaStatePointer, -1) == LUA_TTABLE)
-			{
-				// Display object was successfully created.
-				// Move the display object to where the texture object is currently located on the Lua stack.
-				// This moves the texture object (and everything above it) up on the Lua stack.
-				wasDisplayObjectCreated = true;
-				lua_insert(luaStatePointer, textureIndex);
-				textureIndex++;
-			}
-			else
-			{
-				lua_pop(luaStatePointer, 1);
-			}
-		}
-		else
-		{
-			lua_pop(luaStatePointer, 1);
-		}
-	}
-	lua_pop(luaStatePointer, 1);
-
-	// Release the texture object's reference to the loaded image.
-	lua_getfield(luaStatePointer, textureIndex, "releaseSelf");
-	if (lua_type(luaStatePointer, -1) == LUA_TFUNCTION)
-	{
-		lua_pushvalue(luaStatePointer, textureIndex);
-		int callResultCode = CoronaLuaDoCall(luaStatePointer, 1, 0);
-		if (callResultCode)
-		{
-			// Failed to call function. Pop off the Lua error message.
-			lua_pop(luaStatePointer, 1);
-		}
-	}
-	else
-	{
-		lua_pop(luaStatePointer, 1);
-	}
-
-	// Pop the texture object off of the stack. We're done with it.
-	lua_pop(luaStatePointer, 1);
-
-	// At this point, the created DisplayObject should be at the top of the stack, to be returnd to Lua.
-	// If not created, then push and return nil.
-	if (!wasDisplayObjectCreated)
-	{
-		CoronaLuaWarning(luaStatePointer, "Failed to generate DisplayObject for image handle: %d", imageHandle);
-		lua_pushnil(luaStatePointer);
-	}
-	return 1;
-}
-
-/** TextureResourceExternal steamworks.newTexture(imageHandle) */
-int OnNewTexture(lua_State* luaStatePointer)
-{
-	// Validate.
-	if (!luaStatePointer)
-	{
-		return 0;
-	}
-
-	// Fetch the required image handle argument.
-	int imageHandle = 0;
-	if (lua_type(luaStatePointer, 1) == LUA_TNUMBER)
-	{
-		imageHandle = (int)lua_tointeger(luaStatePointer, 1);
-	}
-	else
-	{
-		CoronaLuaError(luaStatePointer, "1st argument must be a numeric 'imageHandle'.");
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-
-	// Do not continue if given an invalid handle.
-	auto imageInfo = SteamImageInfo::FromImageHandle(imageHandle);
-	if (imageInfo.IsNotValid())
-	{
-		lua_pushnil(luaStatePointer);
-		return 1;
-	}
-
-	// Copy the Steam image to a new Corona "TextureResourceExternal" object and return it.
-	return SteamImageWrapper::PushTexture(luaStatePointer, imageHandle);
 }
 
 /** bool steamworks.requestActivePlayerCount(listener) */
@@ -3111,14 +2753,10 @@ CORONA_EXPORT int luaopen_plugin_steamworks(lua_State* luaStatePointer)
 	{
 		const struct luaL_Reg luaFunctions[] =
 		{
-			{ "getAchievementImageInfo", OnGetAchievementImageInfo },
 			{ "getAchievementInfo", OnGetAchievementInfo },
 			{ "getAchievementNames", OnGetAchievementNames },
-			{ "getUserImageInfo", OnGetUserImageInfo },
 			{ "getUserInfo", OnGetUserInfo },
 			{ "getUserStatValue", OnGetUserStatValue },
-			{ "newImageRect", OnNewImageRect },
-			{ "newTexture", OnNewTexture },
 			{ "requestActivePlayerCount", OnRequestActivePlayerCount },
 			{ "requestLeaderboardEntries", OnRequestLeaderboardEntries },
 			{ "requestLeaderboardInfo", OnRequestLeaderboardInfo },

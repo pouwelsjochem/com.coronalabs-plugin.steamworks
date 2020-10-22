@@ -15,8 +15,6 @@
 #include "LuaMethodCallback.h"
 #include "PluginMacros.h"
 #include "SteamCallResultHandler.h"
-#include "SteamImageInfo.h"
-#include "SteamUserImageType.h"
 #include <functional>
 #include <memory>
 #include <queue>
@@ -139,17 +137,6 @@ class RuntimeContext
 		 */
 		SteamLeaderboardEntries_t GetCachedLeaderboardHandleByName(const char* name) const;
 
-		/**
-		  Get Steam image information for the given user an image type.
-		  @param userSteamId Unique ID of the user to fetch the image from.
-		  @param imageType The type of image to fetch such as kAvatarSmall, kAvatarMedium, or kAvatarLarge.
-		  @return Returns an object providing the image's pixel width, pixel height, and unique integer handle
-		          assigned to the image by Steam. This handle is needed to load the image using Steam's APIs.
-
-		          Returns an invalid object if given invalid arguments or if not connected to the Steam client.
-		 */
-		SteamImageInfo GetUserImageInfoFor(const CSteamID& userSteamId, const SteamUserImageType& imageType);
-
 		template<class TSteamResultType, class TDispatchEventTask>
 		/**
 		  Sets up a Steam CCallResult handler used to receive the result from a Steam async operation and
@@ -230,11 +217,8 @@ class RuntimeContext
 		void OnHandleGlobalSteamEventWithGameId(TSteamResultType* eventDataPointer);
 
 		/** Set up global Steam event handlers via their macros. */
-		STEAM_CALLBACK(RuntimeContext, OnSteamAvatarImageLoaded, AvatarImageLoaded_t);
 		STEAM_CALLBACK(RuntimeContext, OnSteamGameOverlayActivated, GameOverlayActivated_t);
 		STEAM_CALLBACK(RuntimeContext, OnSteamMicrotransactionAuthorizationReceived, MicroTxnAuthorizationResponse_t);
-		STEAM_CALLBACK(RuntimeContext, OnSteamPersonaStateChanged, PersonaStateChange_t);
-		STEAM_CALLBACK(RuntimeContext, OnSteamUserAchievementIconFetched, UserAchievementIconFetched_t);
 		STEAM_CALLBACK(RuntimeContext, OnSteamUserAchievementStored, UserAchievementStored_t);
 		STEAM_CALLBACK(RuntimeContext, OnSteamUserStatsReceived, UserStatsReceived_t);
 		STEAM_CALLBACK(RuntimeContext, OnSteamUserStatsStored, UserStatsStored_t);
@@ -269,9 +253,6 @@ class RuntimeContext
 		  Steam "LeaderboardFindResult_t" event has been received.
 		 */
 		std::unordered_map<std::string, SteamLeaderboard_t> fLeaderboardNameHandleMap;
-
-		/** Stores a collection of Steam user IDs (in integer form) that are subscribed to large avatars. */
-		std::unordered_set<uint64> fLargeAvatarSubscribedUserIdSet;
 
 		/** Set true if we need to force Corona to render on the next "enterFrame" event. */
 		bool fWasRenderRequested;

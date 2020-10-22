@@ -5,7 +5,7 @@ Add following to your `build.settings` to use:
 {
     plugins = {
         "plugin.steamworks" = {
-            publisherId = "com.coronalabs",
+            publisherId = "com.tragsoft",
         },
     },
 }

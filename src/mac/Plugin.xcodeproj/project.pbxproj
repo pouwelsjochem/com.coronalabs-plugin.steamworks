@@ -7,12 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		03C1ADE41D35A9CB00700E77 /* SteamImageInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 03C1ADE01D35A9CB00700E77 /* SteamImageInfo.cpp */; };
-		03C1ADE51D35A9CB00700E77 /* SteamImageInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 03C1ADE11D35A9CB00700E77 /* SteamImageInfo.h */; };
-		03C1ADE61D35A9CB00700E77 /* SteamUserImageType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 03C1ADE21D35A9CB00700E77 /* SteamUserImageType.cpp */; };
-		03C1ADE71D35A9CB00700E77 /* SteamUserImageType.h in Headers */ = {isa = PBXBuildFile; fileRef = 03C1ADE31D35A9CB00700E77 /* SteamUserImageType.h */; };
-		F55F08381D1F699C00201C5C /* SteamImageWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55F08361D1F699C00201C5C /* SteamImageWrapper.cpp */; };
-		F55F08391D1F699C00201C5C /* SteamImageWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = F55F08371D1F699C00201C5C /* SteamImageWrapper.h */; };
 		F5852E4C1D08589300BD1AE3 /* BaseSteamCallResultHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5852E3C1D08589300BD1AE3 /* BaseSteamCallResultHandler.cpp */; };
 		F5852E4D1D08589300BD1AE3 /* BaseSteamCallResultHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = F5852E3D1D08589300BD1AE3 /* BaseSteamCallResultHandler.h */; };
 		F5852E4E1D08589300BD1AE3 /* DispatchEventTask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5852E3E1D08589300BD1AE3 /* DispatchEventTask.cpp */; };
@@ -50,13 +44,7 @@
 
 /* Begin PBXFileReference section */
 		033235EA1CA6285B001E62D6 /* libsteam_api.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsteam_api.dylib; path = ../Dependencies/Steam/redistributable_bin/osx/libsteam_api.dylib; sourceTree = "<group>"; };
-		03C1ADE01D35A9CB00700E77 /* SteamImageInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SteamImageInfo.cpp; path = ../Source/SteamImageInfo.cpp; sourceTree = "<group>"; };
-		03C1ADE11D35A9CB00700E77 /* SteamImageInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SteamImageInfo.h; path = ../Source/SteamImageInfo.h; sourceTree = "<group>"; };
-		03C1ADE21D35A9CB00700E77 /* SteamUserImageType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SteamUserImageType.cpp; path = ../Source/SteamUserImageType.cpp; sourceTree = "<group>"; };
-		03C1ADE31D35A9CB00700E77 /* SteamUserImageType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SteamUserImageType.h; path = ../Source/SteamUserImageType.h; sourceTree = "<group>"; };
 		800621091B72CFEF00E34F9D /* plugin_steamworks.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = plugin_steamworks.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		F55F08361D1F699C00201C5C /* SteamImageWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SteamImageWrapper.cpp; path = ../Source/SteamImageWrapper.cpp; sourceTree = "<group>"; };
-		F55F08371D1F699C00201C5C /* SteamImageWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SteamImageWrapper.h; path = ../Source/SteamImageWrapper.h; sourceTree = "<group>"; };
 		F5852E3C1D08589300BD1AE3 /* BaseSteamCallResultHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BaseSteamCallResultHandler.cpp; path = ../Source/BaseSteamCallResultHandler.cpp; sourceTree = "<group>"; };
 		F5852E3D1D08589300BD1AE3 /* BaseSteamCallResultHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BaseSteamCallResultHandler.h; path = ../Source/BaseSteamCallResultHandler.h; sourceTree = "<group>"; };
 		F5852E3E1D08589300BD1AE3 /* DispatchEventTask.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DispatchEventTask.cpp; path = ../Source/DispatchEventTask.cpp; sourceTree = "<group>"; };
@@ -120,14 +108,8 @@
 				F5852E461D08589300BD1AE3 /* RuntimeContext.cpp */,
 				F5852E471D08589300BD1AE3 /* RuntimeContext.h */,
 				F5852E481D08589300BD1AE3 /* SteamCallResultHandler.h */,
-				03C1ADE01D35A9CB00700E77 /* SteamImageInfo.cpp */,
-				03C1ADE11D35A9CB00700E77 /* SteamImageInfo.h */,
-				F55F08361D1F699C00201C5C /* SteamImageWrapper.cpp */,
-				F55F08371D1F699C00201C5C /* SteamImageWrapper.h */,
 				F5852E491D08589300BD1AE3 /* SteamStatValueType.cpp */,
 				F5852E4A1D08589300BD1AE3 /* SteamStatValueType.h */,
-				03C1ADE21D35A9CB00700E77 /* SteamUserImageType.cpp */,
-				03C1ADE31D35A9CB00700E77 /* SteamUserImageType.h */,
 				F5852E4B1D08589300BD1AE3 /* SteamworksLuaInterface.cpp */,
 			);
 			name = src;
@@ -152,13 +134,10 @@
 				F5852E4D1D08589300BD1AE3 /* BaseSteamCallResultHandler.h in Headers */,
 				F5852E521D08589300BD1AE3 /* LuaMethodCallback.h in Headers */,
 				F5852E4F1D08589300BD1AE3 /* DispatchEventTask.h in Headers */,
-				03C1ADE51D35A9CB00700E77 /* SteamImageInfo.h in Headers */,
-				03C1ADE71D35A9CB00700E77 /* SteamUserImageType.h in Headers */,
 				F5852E511D08589300BD1AE3 /* LuaEventDispatcher.h in Headers */,
 				F5852E5A1D08589300BD1AE3 /* SteamStatValueType.h in Headers */,
 				F5852E541D08589300BD1AE3 /* PluginConfigLuaSettings.h in Headers */,
 				F5852E551D08589300BD1AE3 /* PluginMacros.h in Headers */,
-				F55F08391D1F699C00201C5C /* SteamImageWrapper.h in Headers */,
 				F5852E571D08589300BD1AE3 /* RuntimeContext.h in Headers */,
 				F5852E581D08589300BD1AE3 /* SteamCallResultHandler.h in Headers */,
 			);
@@ -218,15 +197,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5852E4E1D08589300BD1AE3 /* DispatchEventTask.cpp in Sources */,
-				03C1ADE41D35A9CB00700E77 /* SteamImageInfo.cpp in Sources */,
 				F5852E4C1D08589300BD1AE3 /* BaseSteamCallResultHandler.cpp in Sources */,
 				F5852E561D08589300BD1AE3 /* RuntimeContext.cpp in Sources */,
 				F5852E501D08589300BD1AE3 /* LuaEventDispatcher.cpp in Sources */,
-				F55F08381D1F699C00201C5C /* SteamImageWrapper.cpp in Sources */,
 				F5852E531D08589300BD1AE3 /* PluginConfigLuaSettings.cpp in Sources */,
 				F5852E591D08589300BD1AE3 /* SteamStatValueType.cpp in Sources */,
 				F5852E5B1D08589300BD1AE3 /* SteamworksLuaInterface.cpp in Sources */,
-				03C1ADE61D35A9CB00700E77 /* SteamUserImageType.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
